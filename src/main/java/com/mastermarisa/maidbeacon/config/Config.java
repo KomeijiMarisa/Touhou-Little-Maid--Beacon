@@ -1,23 +1,20 @@
 package com.mastermarisa.maidbeacon.config;
 
-import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.mastermarisa.maidbeacon.data.EffectAura;
-import com.mastermarisa.maidbeacon.utils.EffectAuraManager;
 import com.mastermarisa.maidbeacon.utils.EncodeUtils;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import org.apache.commons.compress.utils.Lists;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 public class Config {
     private static List<EffectAura> EFFECT_AURAS;
@@ -67,31 +64,11 @@ public class Config {
         return costs.get(level);
     }
 
-    public static boolean ENABLE_BEACON_RENDERING() {
-        return Client.ENABLE_BEACON_RENDERING.getAsBoolean();
-    }
-
-    public static boolean ENABLE_BEACON_BEAM_RENDERING() {
-        return Client.ENABLE_BEACON_BEAM_RENDERING.getAsBoolean();
-    }
-
-    public static double Y_OFFSET() {
-        return Client.BEACON_RENDERING_Y_OFFSET.getAsDouble();
-    }
-
-    public static double Y_OFFSET_SITTING() {
-        return Client.BEACON_RENDERING_Y_OFFSET_SITTING.getAsDouble();
-    }
-
     public static boolean ENABLE_BEACON_RANGE_RENDERING() { return Server.ENABLE_BEACON_RANGE_RENDERING.getAsBoolean(); }
 
     private static class Client {
         public static final ModConfigSpec.Builder BUILDER;
         public static final ModConfigSpec SPEC;
-        public static final ModConfigSpec.BooleanValue ENABLE_BEACON_RENDERING;
-        public static final ModConfigSpec.BooleanValue ENABLE_BEACON_BEAM_RENDERING;
-        public static final ModConfigSpec.DoubleValue BEACON_RENDERING_Y_OFFSET;
-        public static final ModConfigSpec.DoubleValue BEACON_RENDERING_Y_OFFSET_SITTING;
 
         public static void register(ModContainer modContainer) {
             modContainer.registerConfig(ModConfig.Type.CLIENT, SPEC);
@@ -100,27 +77,13 @@ public class Config {
         static {
             BUILDER = new ModConfigSpec.Builder();
 
-            ENABLE_BEACON_RENDERING = BUILDER
-                    .translation("config.maidbeacon.client.enable_beacon_rendering")
-                    .define("enable_beacon_rendering", true);
-
-            ENABLE_BEACON_BEAM_RENDERING = BUILDER
-                    .translation("config.maidbeacon.client.enable_beacon_beam_rendering")
-                    .define("enable_beacon_beam_rendering", true);
-
-            BEACON_RENDERING_Y_OFFSET = BUILDER
-                    .translation("config.maidbeacon.client.beacon_rendering_y_offset")
-                    .defineInRange("beacon_rendering_y_offset", 0.5F, -1000, Double.MAX_VALUE);
-
-            BEACON_RENDERING_Y_OFFSET_SITTING = BUILDER
-                    .translation("config.maidbeacon.beacon_rendering_y_offset_sitting")
-                    .defineInRange("beacon_rendering_y_offset_sitting", -0.1F, -1000, Double.MAX_VALUE);
-
             SPEC = BUILDER.build();
         }
     }
 
     private static class Server {
+        public static final List<String> defaultAuraData;
+
         public static final ModConfigSpec.Builder BUILDER;
         public static final ModConfigSpec SPEC;
         public static final ModConfigSpec.ConfigValue<List<? extends String>> EFFECT_AURAS;
@@ -135,11 +98,20 @@ public class Config {
         }
 
         static {
+            defaultAuraData = Stream.of(
+                    new EffectAura("minecraft:speed", 0, 0, 1, 20),
+                    new EffectAura("minecraft:haste", 0, 0, 1, 20),
+                    new EffectAura("minecraft:resistance", 0, 1, 1, 20),
+                    new EffectAura("minecraft:jump_boost",0,1,1,20),
+                    new EffectAura("minecraft:strength",0,2,1,20),
+                    new EffectAura("minecraft:regeneration",0,3,2,20)
+            ).map(EncodeUtils::toJson).toList();
+
             BUILDER = new ModConfigSpec.Builder();
 
             EFFECT_AURAS = BUILDER
                     .translation("config.maidbeacon.server.effect_auras")
-                    .defineList("effect_auras", EffectAuraManager.defaultData, ()-> "", (e)-> e instanceof String);
+                    .defineList("effect_auras", defaultAuraData, ()-> "", (e)-> e instanceof String);
 
             BEACON_COST = BUILDER
                     .translation("config.maidbeacon.server.beacon_cost")
@@ -155,9 +127,9 @@ public class Config {
             ITEMSTACK_TO_UPGRADE_BEACON_LEVEL = BUILDER
                     .translation("config.maidbeacon.server.itemstack")
                     .defineList("itemstack_to_upgrade_beacon_level", List.of(
-                            EncodeUtils.toJson(new ItemStackData("minecraft:iron_block", 9)),
                             EncodeUtils.toJson(new ItemStackData("minecraft:gold_block", 9)),
-                            EncodeUtils.toJson(new ItemStackData("minecraft:diamond_block", 9))
+                            EncodeUtils.toJson(new ItemStackData("minecraft:diamond_block", 9)),
+                            EncodeUtils.toJson(new ItemStackData("minecraft:netherite_block", 9))
                     ), ()-> "", (e)-> e instanceof String);
 
             EFFECT_CHECK_INTERVAL = BUILDER

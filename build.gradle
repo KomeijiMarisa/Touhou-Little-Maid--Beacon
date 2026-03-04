@@ -80,7 +80,7 @@ configurations {
 }
 
 dependencies {
-    implementation "curse.maven:touhou-little-maid-355044:7307724"
+    implementation "curse.maven:touhou-little-maid-355044:7510722"
     implementation "curse.maven:jade-324717:7428884"
 }
 

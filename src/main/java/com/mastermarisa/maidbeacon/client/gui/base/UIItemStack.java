@@ -13,6 +13,7 @@ import java.util.List;
 public class UIItemStack extends UIElement {
     public static final int size = 16;
     public ItemStack itemStack;
+    public boolean renderTooltip = true;
 
     public UIItemStack(ItemStack itemStack) {
         super(new Rectangle(16, 16));
@@ -36,7 +37,7 @@ public class UIItemStack extends UIElement {
     @Override
     protected void tryRenderTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
         boolean hover = frame.contains(mouseX,mouseY);
-        if (hover) {
+        if (hover && renderTooltip) {
             if (!tooltip.isEmpty()) {
                 this.renderTooltip(graphics, this.itemStack, tooltip, mouseX, mouseY);
             } else {

@@ -34,7 +34,7 @@ public class UIEditBox extends UIElement {
         this.editBox.setResponder(responder);
         this.editBox.setTextColor(textColor.getRGB());
 
-        this.bg = new UIBox(new Rectangle(frame.width + 6,frame.height),color);
+        this.bg = new UIBox(new Rectangle(frame.width + 6,frame.height), color);
         this.children = List.of(bg);
     }
 
@@ -42,7 +42,6 @@ public class UIEditBox extends UIElement {
     protected void render(GuiGraphics graphics, int mouseX, int mouseY) {
         resize();
         super.render(graphics, mouseX, mouseY);
-        //editBox.render(graphics,mouseX,mouseY,0);
     }
 
     public void resize() {
